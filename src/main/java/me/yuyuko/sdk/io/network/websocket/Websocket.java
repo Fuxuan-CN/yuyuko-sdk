@@ -1,5 +1,7 @@
 package me.yuyuko.sdk.io.network.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
@@ -38,6 +40,7 @@ public final class Websocket implements IWebsocket, AutoCloseable {
     private volatile boolean connected = false;
     private String subProtocol;
     private final Map<String, String> headers = new HashMap<>();
+    private final ObjectMapper defaultJsonMapper = new ObjectMapper();
 
     // 一些事件回调
     private Runnable onOpenCallback;
@@ -189,22 +192,13 @@ public final class Websocket implements IWebsocket, AutoCloseable {
     }
 
     /**
-     * 发送消息
+     * 同步发送消息
     */
     @Override
     public void send(Object message, boolean last) throws WebsocketConnectionException, IllegalArgumentException {
         checkIsConnected();
         Objects.requireNonNull(message);
-        CompletableFuture<?> future;
-        if (message instanceof String) {
-            future = webSocket.sendText((String) message, last);
-        } else if (message instanceof ByteBuffer) {
-            future = webSocket.sendBinary((ByteBuffer) message, last);
-        } else if (message instanceof byte[]) {
-            future = webSocket.sendBinary(ByteBuffer.wrap((byte[]) message), last);
-        } else {
-            throw new IllegalArgumentException("Unsupported message type: " + message.getClass());
-        }
+        CompletableFuture<?> future = sendInternal(message, last);
         future.join();
     }
 
@@ -215,12 +209,28 @@ public final class Websocket implements IWebsocket, AutoCloseable {
     public CompletableFuture<?> sendAsync(Object message, boolean last) throws WebsocketConnectionException, IllegalArgumentException {
         checkIsConnected();
         Objects.requireNonNull(message);
+        return sendInternal(message, last);
+    }
+
+    /**
+     * 发送消息的内部实现
+    */
+    private CompletableFuture<?> sendInternal(Object message, boolean last) throws IllegalArgumentException {
         if (message instanceof String) {
             return webSocket.sendText((String) message, last);
         } else if (message instanceof ByteBuffer) {
             return webSocket.sendBinary((ByteBuffer) message, last);
         } else if (message instanceof byte[]) {
             return webSocket.sendBinary(ByteBuffer.wrap((byte[]) message), last);
+        } else if (message instanceof Map) {
+            try {
+                String json = defaultJsonMapper.writeValueAsString(message);
+                return webSocket.sendText(json, last);
+            } catch (IOException e) {
+                CompletableFuture<?> failed = new CompletableFuture<>();
+                failed.completeExceptionally(new IllegalArgumentException("Failed to convert Map to JSON", e));
+                return failed;
+            }
         } else {
             CompletableFuture<?> failed = new CompletableFuture<>();
             failed.completeExceptionally(new IllegalArgumentException("Unsupported message type: " + message.getClass()));

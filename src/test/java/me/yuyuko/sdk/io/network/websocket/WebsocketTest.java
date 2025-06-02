@@ -6,6 +6,7 @@ import me.yuyuko.sdk.time.TimeDelta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -75,6 +76,21 @@ class WebsocketTest {
         } catch (WebsocketConnectionException e) {
             fail("Websocket send should not throw an exception");
         }
+    }
+
+    @Test
+    void testSendJson()
+    {
+        try {
+            log("testing send json.");
+            websocket.connect();
+            HashMap<String, String> json_dat = new HashMap<String, String>();
+            json_dat.put("key1", "value1");
+            websocket.send(json_dat, false);
+        } catch (Exception e) {
+            fail("send json throw an exception");
+        }
+        
     }
 
     @Test
