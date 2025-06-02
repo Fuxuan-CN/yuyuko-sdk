@@ -253,6 +253,14 @@ public final class Websocket implements IWebsocket, AutoCloseable {
     }
 
     /**
+     * 返回消息列表中还剩多少消息被取出
+    */
+    public int getMessageNeedRecv()
+    {
+        return messageQueue.size();
+    }
+
+    /**
      * 关闭ws连接，同时关闭HttpClient
     */
     @Override

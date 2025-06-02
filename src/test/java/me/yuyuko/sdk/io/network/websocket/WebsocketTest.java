@@ -86,7 +86,10 @@ class WebsocketTest {
             websocket.connect();
             HashMap<String, String> json_dat = new HashMap<String, String>();
             json_dat.put("key1", "value1");
-            websocket.send(json_dat, false);
+            websocket.send(json_dat, true);
+            log("received: "+ websocket.recv());
+            Thread.sleep(500);
+            log("received: "+ websocket.recv());
         } catch (Exception e) {
             fail("send json throw an exception");
         }
