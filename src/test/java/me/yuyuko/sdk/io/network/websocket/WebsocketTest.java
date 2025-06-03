@@ -87,9 +87,8 @@ class WebsocketTest {
             HashMap<String, String> json_dat = new HashMap<String, String>();
             json_dat.put("key1", "value1");
             websocket.send(json_dat, true);
-            log("received: "+ websocket.recv());
-            Thread.sleep(500);
-            log("received: "+ websocket.recv());
+            log("received: "+ websocket.recv(1, TimeUnit.SECONDS));
+            log("received: "+ websocket.recv(1, TimeUnit.SECONDS));
         } catch (Exception e) {
             fail("send json throw an exception");
         }
@@ -117,10 +116,10 @@ class WebsocketTest {
         try {
             log("testing recv.");
             websocket.connect();
-            Object message = websocket.recv();
+            Object message = websocket.recv(1, TimeUnit.SECONDS);
             assertNotNull(message, "Received message should not be null");
             log("testing recv success.");
-        } catch (WebsocketConnectionException e) {
+        } catch (WebsocketConnectionException | InterruptedException e) {
             fail("Websocket recv should not throw an exception");
         }
     }
