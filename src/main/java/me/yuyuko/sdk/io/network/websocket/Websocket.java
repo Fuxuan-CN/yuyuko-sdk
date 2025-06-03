@@ -239,25 +239,15 @@ public final class Websocket implements IWebsocket, AutoCloseable {
     }
 
     /**
-     * 接收消息
-    */
-    @Override
-    public Object recv() throws WebsocketConnectionException, RuntimeException {
+     * 同步接收消息（阻塞，直到有消息或超时）
+     * @param timeout 超时时间
+     * @param timeUnit 时间单位
+     * @return 如果在超时时间内有消息，返回消息；否则返回null
+     * @throws InterruptedException 如果线程被中断
+     */
+    public Object recv(long timeout, TimeUnit timeUnit) throws InterruptedException, WebsocketConnectionException {
         checkIsConnected();
-        try {
-            return messageQueue.take();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Interrupted while waiting for message", e);
-        }
-    }
-
-    /**
-     * 返回消息列表中还剩多少消息被取出
-    */
-    public int getMessageNeedRecv()
-    {
-        return messageQueue.size();
+        return messageQueue.poll(timeout, timeUnit);
     }
 
     /**

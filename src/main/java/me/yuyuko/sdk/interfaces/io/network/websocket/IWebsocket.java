@@ -15,7 +15,7 @@ public interface IWebsocket {
     void disconnect(int status, String reason);
     void send(Object message, boolean last) throws WebsocketConnectionException;
     CompletableFuture<?> sendAsync(Object message, boolean last) throws WebsocketConnectionException;
-    Object recv() throws WebsocketConnectionException;
+    Object recv(long timeout, TimeUnit timeUnit) throws WebsocketConnectionException, InterruptedException;
     CompletableFuture<Object> recvAsync(long waitTime, TimeUnit unit) throws WebsocketConnectionException;
     IWebsocket setSubProtocol(String... subProtocolName);
     IWebsocket addHeader(String key, String value);
