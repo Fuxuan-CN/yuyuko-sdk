@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import me.yuyuko.sdk.interfaces.io.network.websocket.IWebsocket;
 import me.yuyuko.sdk.exceptions.network.websocket.WebsocketConnectionException;
+import me.yuyuko.sdk.exceptions.network.websocket.WebsocketConnectionTimedOut;
 import me.yuyuko.sdk.time.TimeDelta;
 
 import java.net.URI;
@@ -19,7 +20,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -84,7 +84,7 @@ public class NettyWebsocket implements IWebsocket {
 
             long timeoutMillis = connectionTimeout.toTimeUnit(TimeUnit.MILLISECONDS);
             if (!channel.closeFuture().await(timeoutMillis)) {
-                throw new TimeoutException("Connect to " + url + " timed out after " + connectionTimeout);
+                throw new WebsocketConnectionTimedOut("Connect to " + url + " timed out after " + connectionTimeout);
             }
         } catch (Exception e) {
             throw new WebsocketConnectionException("Failed to connect to " + url, e);
