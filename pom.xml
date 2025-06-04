@@ -26,12 +26,6 @@
             <version>5.9.2</version>
             <scope>test</scope>
         </dependency>
-        <!-- netty Websocket -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-http</artifactId>
-            <version>4.1.82.Final</version>
-        </dependency>
         <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
